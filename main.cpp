@@ -8,13 +8,12 @@
 
 using namespace std;
 
-unordered_map<string, vector<string>> create_map(string filename) {
+void create_map(string filename, unordered_map<string, vector<string>>* map) {
     ifstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Error: Could not open the file.");
     }
 
-    unordered_map<string, vector<string>> map;
     string line;
 
     while (getline(file, line)) {
@@ -27,10 +26,10 @@ unordered_map<string, vector<string>> create_map(string filename) {
         while (getline(lineStream, rest, ';')) {
             values.push_back(rest);
         }
-        map[key] = values;
+        (*map)[key] = values;
     }
     file.close();
-    return map;
+    cout << "file was processed" << endl;
 }
 
 float calculate_distance(float lat_click, float long_click, string lat_record, string long_record) {
@@ -38,18 +37,18 @@ float calculate_distance(float lat_click, float long_click, string lat_record, s
 }
 
 int main() {
-    unordered_map<string, vector<string>> squamates = create_map("squamata_test.csv");
-
+    unordered_map<string, vector<string>>* squamates = new unordered_map<string, vector<string>>;
+    create_map("squamata-dataCondensed.csv", squamates);
     //get the coordinates from the map image
-    float latitude = 0.0; //dummy
+    /*float latitude = 0.0; //dummy
     float longitude = 0.0; //dummy
-    vector<pair<string, float>> distances;
+    vector<pair<string, float>> distances;*/
 
     //calculate the distances and create
-    for (const auto& pair : squamates) {
+    /*for (const auto& pair : *squamates) {
         distances.emplace_back(pair.first, calculate_distance(latitude, longitude, pair.second[2], pair.second[3]));
-    }
+    }*/
 
-
+    delete squamates;
     return 0;
 }
