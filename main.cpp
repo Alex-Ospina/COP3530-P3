@@ -1,14 +1,4 @@
-#include <iostream>
 #include "backendFunctionality.h"
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <utility>
-#include <cmath>
-
 
 /*
  * TODO:
@@ -24,16 +14,21 @@
  */
 
 int main() {
+    Backend& backend = Backend::getInstance();
+    // Dynamically allocated to avoid stack overflow error. Holds all data from the CSV.
     unordered_map<string, vector<string>>* squamates = new unordered_map<string, vector<string>>;
-    create_map("squamata-dataCondensed.csv", squamates);
-
-
-    // Create a window with dimensions fitted to our chosen WGS84 map of the continental US (WGS84 map was chosen for simplicity in calculating longitude/latitude coords from mouse pos)
+    // Holds latitude and longitude values of mouse
+    pair<double, double> latAndLong;
+    // Store data from CSV to map
+    backend.createMap("", squamates);
+    // Create a window with dimensions fitted to our chosen WGS84 map of the continental US (WGS84 map was chosen for simplicity in calculating longitude/latitude coords from mouse position)
     sf::RenderWindow window(sf::VideoMode(1224, 656), "Reptile Finder", sf::Style::Close | sf::Style::Titlebar);
     sf::Texture mapTexture;
     // Making sure image in loaded in correctly
-    if (!mapTexture.loadFromFile("WGS84_USA.png"))
+    if (!mapTexture.loadFromFile("WGS84_USA.png")) {
         cout << "Error loading map image!!!";
+        return -1;
+    }
     else
         mapTexture.loadFromFile("WGS84_USA.png");
     sf::Sprite mapSprite;
@@ -42,27 +37,27 @@ int main() {
         sf::Event evnt;
         // Handling events
         while (window.pollEvent(evnt)) {
+            sf::Vector2i mouseCoords = sf::Mouse().getPosition(window);
+            // Close window
             if (evnt.type == sf::Event::Closed) {
                 window.close();
             }
-            if (evnt.type == sf::Event::MouseLeft) {
-                sf::Vector2i mouseCoords = sf::Mouse().getPosition(window);
-                
+            // User selected a spot on map
+            if (evnt.type == sf::Event::MouseButtonPressed) {
+                cout << "Mouse Coords: " << mouseCoords.x << ", " << mouseCoords.y << endl;
+                // Convert mouse coords from xy to latitude/longitude
+                latAndLong = backend.coordConvert(mouseCoords.x, mouseCoords.y);
+                cout << "Latitude: " << latAndLong.first << " Longitude: " << latAndLong.second << endl;
+                // backend.calculateDistance
+                // backend.heapSort
+                // backend.quickSort
             }
         }
         window.clear();
         window.draw(mapSprite);
         window.display();
     }
-
-    //clicks is returned from the image as a pair
-    vector<pair<string, double>> distances;
-
-    //calculate the distances and create
-    for (const auto& pair : *squamates) {
-        distances.emplace_back(pair.first, calculate_distance(clicks, pair.second[2], pair.second[3]));
-    }
-
+    // Clean up heap
     delete squamates;
     return 0;
 }
