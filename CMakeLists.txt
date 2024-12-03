@@ -10,5 +10,6 @@ set(SFML_STATIC_LIBRARIES TRUE)
 add_executable(Project3 main.cpp
         backendFunctionality.h
         backendFunctionality.cpp
+        backendFunctionality.cpp
 )
 target_link_libraries(Project3 sfml-graphics sfml-audio)

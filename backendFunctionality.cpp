@@ -1,5 +1,6 @@
 #include "backendFunctionality.h"
 
+
 //Backend &Backend::getInstance() {
 //    static Backend instance;
 //    return instance;
