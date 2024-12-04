@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include <queue>
+#include <cmath>
 
 using namespace std;
 
@@ -15,7 +16,11 @@ class Backend {
     // Constructor
     Backend();
     int k = 10;
+    double toRadians(double degrees); // helper for calculation
+    static constexpr double EARTH_RADIUS = 6371.0;
 public:
+    //calculates distance from click to coordinates of records
+    double calculate_distance(pair<double, double> clicks, string lat_record, string long_record);
     // Allows access to Backend functions
     static Backend& getInstance();
     // Translates mouse's xy coordinates to cooresponding longitude/latitude coordinates scaled to our chosen map
