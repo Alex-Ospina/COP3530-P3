@@ -48,7 +48,8 @@ void Backend::createMap(std::string filename, unordered_map<std::string, vector<
         while (getline(lineStream, rest, ',')) {
             values.push_back(rest);
         }
-        (*map)[key] = values;
+        if (values[1] != "")
+            (*map)[key] = values;
     }
     file.close();
     std::cout << "File was processed" << endl;
@@ -80,33 +81,28 @@ int partition(vector<pair<string, float>>& sub, int low, int high) {
     float pivot = sub[low].second;
     int i = low + 1;
     int j = high;
-    while(true){
-        while(i <= j && sub[i].second < pivot){
+    while(true) {
+        while(i <= j && sub[i].second < pivot) {
             i++;
         }
-        while(i <= j && sub[j].second > pivot){
+        while(i <= j && sub[j].second > pivot) {
             j--;
         }
-
         if(i >= j)
             break;
-
         swap(sub[i], sub[j]);
     }
     swap(sub[low], sub[j]);
     return j;
-
 }
 
 vector<string> Backend::quickSort(vector<pair<string, float>>& distances, int low, int high){
     vector<string> results(k);
-
     if(low < high){
         int pivot = partition(distances, low, high);
         quickSort(distances, low, pivot -1);
         quickSort(distances, pivot + 1, high);
     }
-
     for(int i = 0; i < k; i++){
         results[i] = distances[i].first;
     }

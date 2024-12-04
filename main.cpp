@@ -58,7 +58,12 @@ int main() {
     // Holds latitude and longitude values of mouse
     pair<double, double> latAndLong;
     // Store data from CSV to map
-    backend.createMap("squamata-dataCondensed.csv", squamates);
+    backend.createMap("squamata.csv", squamates);
+    for (auto pair : *squamates) {
+        if (pair.second[1] == "") {
+            throw std::runtime_error("Error: DOESN'T HAVE NAME");
+        }
+    }
     // Create a window with dimensions fitted to our chosen WGS84 map of the continental US (WGS84 map was chosen for simplicity in calculating longitude/latitude coords from mouse position)
     sf::RenderWindow window(sf::VideoMode(1224, 656), "Reptile Finder", sf::Style::Close | sf::Style::Titlebar);
     sf::Texture mapTexture;
@@ -102,11 +107,11 @@ int main() {
                     // Convert mouse coords from xy to latitude/longitude
                     latAndLong = backend.coordConvert(mouseCoords.x, mouseCoords.y);
                     cout << "Latitude: " << latAndLong.first << " Longitude: " << latAndLong.second << endl;
-                    // calculating the distances from clicked coordinates
+                    // Calculating the distances from clicked coordinates to every reptile
                     vector<pair<string, double>> distances;
-//                    for (const auto &pair: *squamates) {
-//                        distances.push_back(make_pair(pair.first, backend.calculate_distance(latAndLong, pair.second[2], pair.second[3])));// push_back(pair.first,backend.calculate_distance(latAndLong, pair.second[2], pair.second[3]));
-//                    }
+                    for (const auto &pair: *squamates) {
+                        distances.push_back(make_pair(pair.first, backend.calculate_distance(latAndLong, pair.second[2], pair.second[3])));// push_back(pair.first,backend.calculate_distance(latAndLong, pair.second[2], pair.second[3]));
+                    }
                     // backend.heapSort
                     // backend.quickSort
                     // Create a new window to display results
@@ -145,7 +150,7 @@ int main() {
                     cout << "K value: " << backend.getK() << endl;
                 }
                 // User is inputing digits. Also handles errors such as when user enters a number that is too great to be stored in an int, or when user's input exceeds bound of text box.
-                else if (isdigit(char (evnt.text.unicode)) && inputText.getGlobalBounds().width < inputBackground.getSize().x - 8 && input.size() < 9) {
+                else if (isdigit(char (evnt.text.unicode)) && inputText.getGlobalBounds().width < inputBackground.getSize().x - 8 && input.size() < 5) {
                     input += char (evnt.text.unicode);
                 }
                 // Update text object to display the user's input
