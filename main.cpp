@@ -14,13 +14,40 @@
  */
 
 int main() {
-    Backend& backend = Backend::getInstance();
+
+    sf::RectangleShape promptBackground;
+    promptBackground.setFillColor(sf::Color(235, 235, 235));
+    promptBackground.setPosition(70, 489);
+    promptBackground.setSize(sf::Vector2f(359, 18));
+
+    sf::Font arial;
+    if (!arial.loadFromFile("Arial.ttf")) {
+        cout << "Error loading font!!!" << endl;
+        return -1;
+    }
+
+    sf::Text prompt("How many nearby unique species do you want to find?", arial, 14);
+    prompt.setFillColor(sf::Color::Black);
+    prompt.setPosition(70, 489);
+
+    sf::RectangleShape inputBackground;
+    inputBackground.setFillColor(sf::Color::White);
+    inputBackground.setOutlineColor(sf::Color::Black);
+    inputBackground.setOutlineThickness(3);
+    inputBackground.setPosition(73, 512);
+    inputBackground.setSize(sf::Vector2f(89.75, 18));
+
+    sf::Text inputText("", arial, 14);
+    inputText.setFillColor(sf::Color::Black);
+
+
+    Backend &backend = Backend::getInstance();
     // Dynamically allocated to avoid stack overflow error. Holds all data from the CSV.
-    unordered_map<string, vector<string>>* squamates = new unordered_map<string, vector<string>>;
+    unordered_map<string, vector<string>> *squamates = new unordered_map<string, vector<string>>;
     // Holds latitude and longitude values of mouse
     pair<double, double> latAndLong;
     // Store data from CSV to map
-    backend.createMap("", squamates);
+    backend.createMap("squamata-dataCondensed.csv", squamates);
     // Create a window with dimensions fitted to our chosen WGS84 map of the continental US (WGS84 map was chosen for simplicity in calculating longitude/latitude coords from mouse position)
     sf::RenderWindow window(sf::VideoMode(1224, 656), "Reptile Finder", sf::Style::Close | sf::Style::Titlebar);
     sf::Texture mapTexture;
@@ -48,16 +75,32 @@ int main() {
                 // Convert mouse coords from xy to latitude/longitude
                 latAndLong = backend.coordConvert(mouseCoords.x, mouseCoords.y);
                 cout << "Latitude: " << latAndLong.first << " Longitude: " << latAndLong.second << endl;
-                // backend.calculateDistance
+                // calculating the distances from clicked coordinates
+//                vector<pair<string, double>> distances;
+//                for (const auto &pair: *squamates) {
+//                    distances.push_back(make_pair(pair.first, backend.calculate_distance(latAndLong, pair.second[2], pair.second[3])));// push_back(pair.first,backend.calculate_distance(latAndLong, pair.second[2], pair.second[3]));
+//                }
                 // backend.heapSort
                 // backend.quickSort
+                sf::RenderWindow resultWindow(sf::VideoMode(1224, 656), "Results of Search",sf::Style::Close | sf::Style::Titlebar);
+                sf::Event evt;
+                while (resultWindow.isOpen()) {
+                    while (resultWindow.pollEvent(evt)) {
+                        if (evt.type == sf::Event::Closed) {
+                            resultWindow.close();
+                        }
+                    }
+                }
             }
         }
         window.clear();
         window.draw(mapSprite);
+        window.draw(promptBackground);
+        window.draw(prompt);
+        window.draw(inputBackground);
         window.display();
     }
-    // Clean up heap
-    delete squamates;
-    return 0;
+        // Clean up heap
+        delete squamates;
+        return 0;
 }
