@@ -14,6 +14,7 @@ using namespace std;
 class Backend {
     // Constructor
     Backend();
+    double toRadians(double degrees); // helper for calculation
 public:
     static constexpr double EARTH_RADIUS = 6371.0;
     // Allows access to Backend functions
@@ -23,6 +24,5 @@ public:
     // Iterates through and stores data from CSV file into an unordered_map[gBifID][vector<scientific name, longitude, latitude, etc>]
     void createMap(string filename, unordered_map<string, vector<string>>* map);
     //calculates distance from click to coordinates of records
-    double toRadians(double degrees);
     double calculate_distance(pair<double, double> clicks, string lat_record, string long_record);
 };

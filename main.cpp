@@ -79,7 +79,7 @@ int main() {
                 // Convert mouse coords from xy to latitude/longitude
                 latAndLong = backend.coordConvert(mouseCoords.x, mouseCoords.y);
                 cout << "Latitude: " << latAndLong.first << " Longitude: " << latAndLong.second << endl;
-                //
+                // calculating the distances from clicked coordinates
                 vector<pair<string, double>> distances;
                 for (const auto& pair : *squamates) {
                     distances.emplace_back(pair.first, backend.calculate_distance(latAndLong, pair.second[2], pair.second[3]));
