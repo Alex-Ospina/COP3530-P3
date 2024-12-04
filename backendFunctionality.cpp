@@ -54,20 +54,41 @@ void Backend::createMap(std::string filename, unordered_map<std::string, vector<
     std::cout << "File was processed" << endl;
 }
 
-double Backend::toRadians(double degrees) {
-    return degrees * M_PI / 180.0;
+class CompareDistances{
+public:
+    bool operator()(const pair<string, float>& specie1, const pair<string, float>& specie2){
+        return specie1.second > specie2.second;
+    }
+};
+
+vector<string>& Backend::heapSort(const vector<pair<string, float>> &distances) {
+    vector<string> results(k);
+    auto minHeap = new priority_queue<pair<string, float>, vector<pair<string, float>>, CompareDistances>;
+    for(auto specie : distances){
+        minHeap->push(specie);
+    }
+    for(int i = 0; i < k; i++){
+        auto nextClosest = minHeap->top();
+        minHeap->pop();
+        results[i] = nextClosest.first;
+    }
+    delete minHeap;
+    return results;
 }
-double Backend::calculate_distance(pair<double, double> clicks, string lat_record, string long_record) {
-    //adapted from: https://www.geeksforgeeks.org/haversine-formula-to-find-distance-between-two-points-on-a-sphere/
-    double lat1 = toRadians(clicks.first);
-    double lon1 = toRadians(clicks.second);
-    double lat2 = toRadians(stod(lat_record));
-    double lon2 = toRadians(stod(long_record));
-    double dLat = lat2 - lat1;
-    double dLon = lon2 - lon1;
-    double a = sin(dLat / 2.0) * sin(dLat / 2.0) +
-               cos(lat1) * cos(lat2) *
-               sin(dLon / 2.0) * sin(dLon / 2.0);
-    double c = 2.0 * atan2(std::sqrt(a), sqrt(1.0 - a));
-    return EARTH_RADIUS * c;
+
+vector<string> &Backend::quickSort(const vector<pair<std::string, float>> &distances) {
+    vector<string> results(k);
+
+    return results;
+}
+
+int Backend::partition(vector<float> sub, int low, int high) {
+    int pivot = sub[low];
+    int up = low;
+    int down = high;
+
+}
+
+void Backend::setK(int k) {
+    this->k = k;
 }
