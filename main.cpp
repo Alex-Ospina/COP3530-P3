@@ -21,33 +21,37 @@
  */
 
 int main() {
-
+    // Sets area behind prompt to grey for aesthetics
     sf::RectangleShape promptBackground;
     promptBackground.setFillColor(sf::Color(235, 235, 235));
     promptBackground.setPosition(70, 489);
     promptBackground.setSize(sf::Vector2f(359, 18));
-
+    // Load font for text
     sf::Font arial;
     if (!arial.loadFromFile("Arial.ttf")) {
         cout << "Error loading font!!!" << endl;
         return -1;
     }
-
+    // Prompt user
     sf::Text prompt("How many nearby unique species do you want to find?", arial, 14);
     prompt.setFillColor(sf::Color::Black);
     prompt.setPosition(70, 489);
-
+    // Set up a text box for user to input data
     sf::RectangleShape inputBackground;
     inputBackground.setFillColor(sf::Color::White);
     inputBackground.setOutlineColor(sf::Color::Black);
     inputBackground.setOutlineThickness(3);
     inputBackground.setPosition(73, 512);
     inputBackground.setSize(sf::Vector2f(89.75, 18));
-
+    // Used to display user's input
     sf::Text inputText("", arial, 14);
     inputText.setFillColor(sf::Color::Black);
-    inputText.setPosition(76, 515);
-
+    inputText.setPosition(74.5, 512);
+    // Test used to display results
+    sf::Text resultText("Test", arial, 14);
+    resultText.setFillColor(sf::Color::Black);
+    resultText.setPosition(5, 5);
+    // Create an instance of backend
     Backend &backend = Backend::getInstance();
     // Dynamically allocated to avoid stack overflow error. Holds all data from the CSV.
     unordered_map<string, vector<string>> *squamates = new unordered_map<string, vector<string>>;
@@ -67,7 +71,9 @@ int main() {
         mapTexture.loadFromFile("WGS84_USA.png");
     sf::Sprite mapSprite;
     mapSprite.setTexture(mapTexture);
+    // This string will hold user's input
     string input;
+    // Keeps track of whether user is using the text box
     bool inputBackgroundSelected = false;
     while (window.isOpen()) {
         sf::Event evnt;
@@ -78,16 +84,19 @@ int main() {
             if (evnt.type == sf::Event::Closed) {
                 window.close();
             }
-            // User selected a spot on map
+            // User pressed on window
             if (evnt.type == sf::Event::MouseButtonPressed) {
+                // User selected text box
                 if (inputBackground.getGlobalBounds().contains(float(mouseCoords.x), float(mouseCoords.y))) {
                     inputBackgroundSelected = true;
                     inputBackground.setOutlineColor(sf::Color::Blue);
                 }
+                // User didn't select text box
                 else {
                     inputBackgroundSelected = false;
                     inputBackground.setOutlineColor(sf::Color::Black);
                 }
+                // User selected a spot on the map
                 if (!inputBackgroundSelected) {
                     cout << "Mouse Coords: " << mouseCoords.x << ", " << mouseCoords.y << endl;
                     // Convert mouse coords from xy to latitude/longitude
@@ -95,34 +104,55 @@ int main() {
                     cout << "Latitude: " << latAndLong.first << " Longitude: " << latAndLong.second << endl;
                     // calculating the distances from clicked coordinates
                     vector<pair<string, double>> distances;
-                    for (const auto &pair: *squamates) {
-                        distances.push_back(make_pair(pair.first, backend.calculate_distance(latAndLong, pair.second[2], pair.second[3])));// push_back(pair.first,backend.calculate_distance(latAndLong, pair.second[2], pair.second[3]));
-                    }
+//                    for (const auto &pair: *squamates) {
+//                        distances.push_back(make_pair(pair.first, backend.calculate_distance(latAndLong, pair.second[2], pair.second[3])));// push_back(pair.first,backend.calculate_distance(latAndLong, pair.second[2], pair.second[3]));
+//                    }
                     // backend.heapSort
                     // backend.quickSort
+                    // Create a new window to display results
                     sf::RenderWindow resultWindow(sf::VideoMode(1224, 656), "Results of Search",sf::Style::Close | sf::Style::Titlebar);
                     sf::Event evt;
                     while (resultWindow.isOpen()) {
+                        // Handling events in results window
                         while (resultWindow.pollEvent(evt)) {
+                            // User closed results window
                             if (evt.type == sf::Event::Closed) {
                                 resultWindow.close();
                             }
                         }
+                        // Render to result window
+                        resultWindow.clear(sf::Color::White);
+                        resultWindow.draw(resultText);
+                        resultWindow.display();
                     }
                 }
             }
+            // User is entering text into text box
             if (inputBackgroundSelected && evnt.type == sf::Event::TextEntered) {
+                // User hit backspace
                 if (evnt.text.unicode == '\b') {
                     if (!input.empty()) {
                         input.pop_back();
                     }
                 }
-                else if (isdigit(char (evnt.text.unicode))) {
+                // User hit enter key
+                else if (evnt.text.unicode == 13) {
+                    inputBackgroundSelected = false;
+                    inputBackground.setOutlineColor(sf::Color::Black);
+                    // Sets k value used in sorting algorithms. If user enters a blank value then last saved k value is used.
+                    if (!input.empty())
+                        backend.setK(stoi(input));
+                    cout << "K value: " << backend.getK() << endl;
+                }
+                // User is inputing digits. Also handles errors such as when user enters a number that is too great to be stored in an int, or when user's input exceeds bound of text box.
+                else if (isdigit(char (evnt.text.unicode)) && inputText.getGlobalBounds().width < inputBackground.getSize().x - 8 && input.size() < 9) {
                     input += char (evnt.text.unicode);
                 }
+                // Update text object to display the user's input
                 inputText.setString(input);
             }
         }
+        // Render to main window
         window.clear();
         window.draw(mapSprite);
         window.draw(promptBackground);

@@ -33,4 +33,5 @@ public:
     vector<string>& quickSort(const vector<pair<string, float>>& distances);
     int partition(vector<float> sub, int low, int high);
     void setK(int k);
+    int getK();
 };

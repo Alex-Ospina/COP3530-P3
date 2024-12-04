@@ -111,3 +111,7 @@ double Backend::calculate_distance(pair<double, double> clicks, string lat_recor
     double c = 2.0 * atan2(std::sqrt(a), sqrt(1.0 - a));
     return EARTH_RADIUS * c;
 }
+
+int Backend::getK() {
+    return k;
+}
