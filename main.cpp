@@ -1,4 +1,5 @@
 #include "backendFunctionality.h"
+#include <chrono>
 
 /*
  * TODO: MOST UP-TO-DATE
@@ -21,6 +22,8 @@
  */
 
 int main() {
+    long heapSortTime;
+    long quickSortTime;
     // Sets area behind prompt to grey for aesthetics
     sf::RectangleShape promptBackground;
     promptBackground.setFillColor(sf::Color(235, 235, 235));
@@ -33,7 +36,7 @@ int main() {
         return -1;
     }
     // Prompt user
-    sf::Text prompt("How many nearby unique species do you want to find?", arial, 14);
+    sf::Text prompt("How many nearby species do you want to find?", arial, 14);
     prompt.setFillColor(sf::Color::Black);
     prompt.setPosition(70, 489);
     // Set up a text box for user to input data
@@ -47,10 +50,59 @@ int main() {
     sf::Text inputText("", arial, 14);
     inputText.setFillColor(sf::Color::Black);
     inputText.setPosition(74.5, 512);
-    // Test used to display results
-    sf::Text resultText("Test", arial, 14);
-    resultText.setFillColor(sf::Color::Black);
-    resultText.setPosition(5, 5);
+    // Text used to display results
+
+    sf::Text heapResult("HeapSort Time Elapsed(ms)", arial, 18);
+    sf::Text quickResult("QuickSort Time Elapsed(ms)", arial, 18);
+
+    int page = 0;
+    sf::Text resultText1("Test1", arial, 20);
+    sf::Text resultText2("Test2", arial, 20);
+    sf::Text resultText3("Test3", arial, 20);
+    sf::Text resultText4("Test4", arial, 20);
+    sf::Text resultText5("Test5", arial, 20);
+    sf::Text resultText6("Test6", arial, 20);
+    sf::Text resultText7("Test7", arial, 20);
+    sf::Text resultText8("Test8", arial, 20);
+    sf::Text resultText9("Test9", arial, 20);
+    sf::Text label("Species", arial, 20);
+    sf::Text link("Link", arial, 20);
+    sf::Text coordinates("Coordinates", arial, 20);
+    label.setFillColor(sf::Color::Black);
+    link.setFillColor(sf::Color::Black);
+    label.setPosition(25, 10);
+    link.setPosition(500, 10);
+    vector<sf::Text> resultTexts = {resultText1, resultText2, resultText3, resultText4, resultText5, resultText6,
+                                resultText7, resultText8, resultText9};
+
+    quickResult.setFillColor(sf::Color::Blue);
+    heapResult.setFillColor(sf::Color::Red);
+    coordinates.setFillColor(sf::Color::Black);
+
+    for(int i = 0; i < resultTexts.size(); i++){
+        resultTexts[i].setFillColor(sf::Color::Black);
+        resultTexts[i].setPosition(25, 40 + i * 55);
+    }
+    sf::Texture backT;
+    if(!backT.loadFromFile("back.png")){
+        throw runtime_error("Cannot load back image");
+    }
+    sf::Texture forwardT;
+    if(!forwardT.loadFromFile("forward.png")){
+        throw runtime_error("Cannot load forward image");
+    }
+    sf::Sprite back;
+    sf::Sprite forward;
+    back.setTexture(backT);
+    back.setScale(0.3, 0.3);
+    forward.setScale(0.3, 0.3);
+    forward.setPosition(1150, 580);
+    forward.setTexture(forwardT);
+    back.setPosition(20, 580);
+    heapResult.setPosition(450, 560);
+    quickResult.setPosition(450, 590);
+    coordinates.setPosition(800, 10);
+
     // Create an instance of backend
     Backend &backend = Backend::getInstance();
     // Dynamically allocated to avoid stack overflow error. Holds all data from the CSV.
@@ -112,8 +164,36 @@ int main() {
                     for (const auto &pair: *squamates) {
                         distances.push_back(make_pair(pair.first, backend.calculate_distance(latAndLong, pair.second[2], pair.second[3])));// push_back(pair.first,backend.calculate_distance(latAndLong, pair.second[2], pair.second[3]));
                     }
-                    // backend.heapSort
-                    // backend.quickSort
+
+                    vector<string> results(backend.getK());
+
+                    // Used to ensure quickSort returns an identitcal results, left here for documentation purposes
+                    //vector<string> results2(backend.getK());
+                    //TODO: Add timer
+
+                    chrono::time_point<std::chrono::high_resolution_clock> timerStart = std::chrono::high_resolution_clock::now();
+                    results = backend.heapSort(distances);
+                    heapSortTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock ::now() - timerStart).count();
+                    timerStart = std::chrono::high_resolution_clock::now();
+                    backend.quickSort(distances);
+                    //We do not catch the results of quickSort since we have tested that heapSort and quickSort return identical vectors
+                    //We used the following code to do so
+                    /*
+                     *  for(int i = 0; i < results.size(); i++){
+                     *      if(results[i] != results2[i])
+                     *          throw runtime_error("Different results");
+                     *  }
+                     */
+
+                    quickSortTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock ::now() - timerStart).count();
+                    heapResult.setString("Heap Sort Elapsed Time(ms) " + to_string(heapSortTime));
+                    quickResult.setString("Quick Sort Elapsed Time(ms) " + to_string(quickSortTime));
+
+                    //Assign initial result texts
+                    for(int i = 0; i < resultTexts.size(); i++){
+                        resultTexts[i].setString((*squamates)[results[i]][1] + "       " + (*squamates)[results[i]][0] + "     " + (*squamates)[results[i]][2] + "     " + (*squamates)[results[i]][3]);
+                    }
+
                     // Create a new window to display results
                     sf::RenderWindow resultWindow(sf::VideoMode(1224, 656), "Results of Search",sf::Style::Close | sf::Style::Titlebar);
                     sf::Event evt;
@@ -124,10 +204,44 @@ int main() {
                             if (evt.type == sf::Event::Closed) {
                                 resultWindow.close();
                             }
+                            if(evt.type == sf::Event::MouseButtonPressed){
+                                sf::Vector2i mouse = sf::Mouse().getPosition(resultWindow);
+                                //Handle pagination logic
+                                if(back.getGlobalBounds().contains(mouse.x, mouse.y)&& page != 0) {
+                                    page--;
+                                    for(int i = 0; i < 9; i++) {
+                                        if (page * 9 + i < results.size())
+                                            resultTexts[i].setString((*squamates)[results[i + 9 * page]][1] + "     " +
+                                                                 (*squamates)[results[i + 9 * page]][0] + "     " +
+                                                                 (*squamates)[results[i + 9 * page]][2] + "     " +
+                                                                 (*squamates)[results[i + 9 * page]][3]);
+                                        else
+                                            resultTexts[i].setString("");
+                                    }
+                                }
+                                else if(forward.getGlobalBounds().contains(mouse.x, mouse.y) && page != ceil(float(backend.getK()/9.0f)) - 1) {
+                                    page++;
+                                    for(int i = 0; i < 9; i++){
+                                        if(page * 9 + i < results.size())
+                                            resultTexts[i].setString((*squamates)[results[i + 9 * page]][1] + "       " + (*squamates)[results[i + 9 * page]][0] + "     " + (*squamates)[results[i + 9 * page]][2] + "     " + (*squamates)[results[i + 9 * page]][3]);
+                                        else
+                                            resultTexts[i].setString("");
+                                    }
+                                }
+                            }
                         }
                         // Render to result window
                         resultWindow.clear(sf::Color::White);
-                        resultWindow.draw(resultText);
+                        for(auto text : resultTexts){
+                            resultWindow.draw(text);
+                        }
+                        resultWindow.draw(label);
+                        resultWindow.draw(link);
+                        resultWindow.draw(back);
+                        resultWindow.draw(forward);
+                        resultWindow.draw(heapResult);
+                        resultWindow.draw(quickResult);
+                        resultWindow.draw(coordinates);
                         resultWindow.display();
                     }
                 }

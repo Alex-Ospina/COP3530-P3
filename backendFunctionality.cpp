@@ -62,7 +62,7 @@ public:
     }
 };
 
-vector<string> Backend::heapSort(const vector<pair<string, float>> &distances) {
+vector<string> Backend::heapSort(const vector<pair<string, double>> &distances) {
     vector<string> results(k);
     auto minHeap = new priority_queue<pair<string, float>, vector<pair<string, float>>, CompareDistances>;
     for(auto specie : distances){
@@ -77,32 +77,41 @@ vector<string> Backend::heapSort(const vector<pair<string, float>> &distances) {
     return results;
 }
 
-int partition(vector<pair<string, float>>& sub, int low, int high) {
+int partition(vector<pair<string, double>>& sub, int low, int high) {
     float pivot = sub[low].second;
     int i = low + 1;
     int j = high;
-    while(true) {
-        while(i <= j && sub[i].second < pivot) {
+    while(true){
+        while(i <= j && sub[i].second < pivot){
             i++;
         }
-        while(i <= j && sub[j].second > pivot) {
+        while(i <= j && sub[j].second > pivot){
             j--;
         }
+
         if(i >= j)
             break;
+
         swap(sub[i], sub[j]);
     }
     swap(sub[low], sub[j]);
     return j;
+
 }
 
-vector<string> Backend::quickSort(vector<pair<string, float>>& distances, int low, int high){
-    vector<string> results(k);
+void Backend::quickSort(vector<pair<string, double>>& distances, int low, int high){
+
     if(low < high){
         int pivot = partition(distances, low, high);
         quickSort(distances, low, pivot -1);
         quickSort(distances, pivot + 1, high);
     }
+
+}
+
+vector<string> Backend::quickSort(vector<pair<std::string, double>> &distances) {
+    vector<string> results(k);
+    quickSort(distances, 0, distances.size() -1);
     for(int i = 0; i < k; i++){
         results[i] = distances[i].first;
     }
