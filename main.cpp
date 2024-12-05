@@ -1,25 +1,6 @@
 #include "backendFunctionality.h"
 #include <chrono>
 
-/*
- * TODO: MOST UP-TO-DATE
- * 1. For Sam: just needs to find a way to test his functions and add some conditional statement that ensures we are only returning elements from the table that have a species name available. Don't forget to track how long each sort takes. If you finish early and have time: fix Alex's issues then Soma's
- * 2. For Alex: center userInput, have the blue outline turn black when user presses enter, and redownload csv file from zip in main and delete first row so that calculate_distance() works
- * 3. For Soma: start working on results window. Use dummy values that would mimic actual results for texting. Also display the time that each sort takes.
- */
-
-/*
- * TODO:
- * 1. Function to read through CSV and store every value in a unsorted_map[gBifID][vector<string> which contains relevent info such as scientific name, longitude/latitude, occurenceID]
- * 2. Function to convert mouse coords to geographic coords (import libraries for greater accuracy? or just do equation for faster but less accurate results)
- *      a. Create bounds so we can throw error messages is user clicks out of bounds, optional
- * 3. Function to find kth smallest (k is user defined number of unique species) using heap. Theoretical complexity O(nlogn)
- *      a. return a vector<pairs<gBifID, distance>>
- * 4. Function to find kth smallest using shell sort. Theoretical complexity O(n^some fraction)
- *      a. first create a function that iterates through entire map and returns a vector<pair<gBifID, distance>>
- *      b. Call shell sort on this vector
- *      c. return kth smallest values in sorted vector
- */
 
 int main() {
     long heapSortTime;
@@ -50,11 +31,10 @@ int main() {
     sf::Text inputText("", arial, 14);
     inputText.setFillColor(sf::Color::Black);
     inputText.setPosition(74.5, 512);
-    // Text used to display results
 
+    // Text used to display results
     sf::Text heapResult("HeapSort Time Elapsed(ms)", arial, 18);
     sf::Text quickResult("QuickSort Time Elapsed(ms)", arial, 18);
-
     int page = 0;
     sf::Text resultText1("Test1", arial, 20);
     sf::Text resultText2("Test2", arial, 20);
@@ -74,11 +54,9 @@ int main() {
     link.setPosition(500, 10);
     vector<sf::Text> resultTexts = {resultText1, resultText2, resultText3, resultText4, resultText5, resultText6,
                                 resultText7, resultText8, resultText9};
-
     quickResult.setFillColor(sf::Color::Blue);
     heapResult.setFillColor(sf::Color::Red);
     coordinates.setFillColor(sf::Color::Black);
-
     for(int i = 0; i < resultTexts.size(); i++){
         resultTexts[i].setFillColor(sf::Color::Black);
         resultTexts[i].setPosition(25, 40 + i * 55);
@@ -169,8 +147,8 @@ int main() {
 
                     // Used to ensure quickSort returns an identitcal results, left here for documentation purposes
                     //vector<string> results2(backend.getK());
-                    //TODO: Add timer
 
+                    //Record amount of time elapsed in each sorting algorithm as it runs
                     chrono::time_point<std::chrono::high_resolution_clock> timerStart = std::chrono::high_resolution_clock::now();
                     results = backend.heapSort(distances);
                     heapSortTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock ::now() - timerStart).count();
@@ -223,7 +201,10 @@ int main() {
                                     page++;
                                     for(int i = 0; i < 9; i++){
                                         if(page * 9 + i < results.size())
-                                            resultTexts[i].setString((*squamates)[results[i + 9 * page]][1] + "       " + (*squamates)[results[i + 9 * page]][0] + "     " + (*squamates)[results[i + 9 * page]][2] + "     " + (*squamates)[results[i + 9 * page]][3]);
+                                            resultTexts[i].setString((*squamates)[results[i + 9 * page]][1] + "       " +
+                                                                    (*squamates)[results[i + 9 * page]][0] + "     " +
+                                                                    (*squamates)[results[i + 9 * page]][2] + "     " +
+                                                                    (*squamates)[results[i + 9 * page]][3]);
                                         else
                                             resultTexts[i].setString("");
                                     }
